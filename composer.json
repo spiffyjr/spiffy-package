@@ -1,0 +1,25 @@
+{
+    "name": "spiffy/spiffy-package",
+    "authors": [
+        {
+            "name": "Kyle Spraggs",
+            "email": "theman@spiffyjr.me"
+        }
+    ],
+    "description": "Spiffy\\Package is a light-weight, HHVM compatible, and dependency lite package manager.",
+    "require": {
+        "php": ">=5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0",
+        "squizlabs/php_codesniffer": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spiffy\\Package\\": [
+                "src/",
+                "test/"
+            ]
+        }
+    }
+}
