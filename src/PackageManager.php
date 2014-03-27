@@ -47,7 +47,7 @@ class PackageManager implements Manager
      */
     public function getPackage($name)
     {
-        if (!array_key_exists($name, $this->packages)) {
+        if (!$this->packages->offsetExists($name)) {
             throw new Exception\PackageDoesNotExistException($name);
         }
 
@@ -77,7 +77,7 @@ class PackageManager implements Manager
             throw new Exception\PackagesAlreadyLoadedException();
         }
 
-        if (array_key_exists($name, $this->packages)) {
+        if ($this->packages->offsetExists($name)) {
             throw new Exception\PackageExistsException($name);
         }
 
