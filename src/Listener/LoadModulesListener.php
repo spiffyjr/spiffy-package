@@ -26,8 +26,9 @@ class LoadModulesListener implements Listener
     {
         /** @var \Spiffy\Package\PackageManager $manager */
         $manager = $e->getTarget();
+        $packages = $manager->getPackages();
 
-        foreach ($manager->getPackages() as $packageName => $package) {
+        foreach ($packages as $packageName => $package) {
             $event = new Event(PackageManager::EVENT_RESOLVE, $packageName);
             $result = $manager->events()->fire($event);
             $package = $result->isEmpty() ? null : $result->top();
@@ -35,6 +36,8 @@ class LoadModulesListener implements Listener
             if (null === $package) {
                 throw new Exception\PackageLoadFailedException($packageName);
             }
+
+            $packages[$packageName] = $package;
         }
     }
 }
