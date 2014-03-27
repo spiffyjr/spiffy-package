@@ -1,8 +1,8 @@
 # Spiffy\Package
 
 [![Build Status](https://travis-ci.org/spiffyjr/spiffy-package.svg)](https://travis-ci.org/spiffyjr/spiffy-package)
-[![Code Coverage](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/badges/coverage.png?s=dfad664d97975d1d7a65b8b24506cda9769e44f9)](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/badges/quality-score.png?s=d85152028d13ee4af9482d457f1e6b06f3d0b348)](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/)
+[![Code Coverage](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/badges/coverage.png?s=e3d80c9767c0d5c9cc049e52a4c12b0e0bb29f1d)](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/badges/quality-score.png?s=e454ad99c82766505cdc8097ec159b56ae9bba20)](https://scrutinizer-ci.com/g/spiffyjr/spiffy-package/)
 
 ## Installation
 
