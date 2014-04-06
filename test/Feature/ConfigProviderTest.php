@@ -37,9 +37,7 @@ class OptionsProviderFeatureTest extends \PHPUnit_Framework_TestCase
         $config->setAccessible(true);
         $config->setValue($manager, [
             'spiffy.package.test_asset.options' => [
-                'options' => [
-                    'foo' => 'bar'
-                ]
+                'foo' => 'bar'
             ]
         ]);
 

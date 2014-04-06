@@ -16,6 +16,7 @@ class LoadModulesListener implements Listener
     public function attach(Manager $events)
     {
         $events->on(PackageManager::EVENT_LOAD, [$this, 'onLoad'], 1000);
+        $events->attach(new ResolvePackageListener());
     }
 
     /**
@@ -28,8 +29,11 @@ class LoadModulesListener implements Listener
         $manager = $e->getTarget();
         $packages = $manager->getPackages();
 
+        $event = new Event(PackageManager::EVENT_RESOLVE);
         foreach ($packages as $packageName => $package) {
-            $event = new Event(PackageManager::EVENT_RESOLVE, $packageName);
+            $event->setTarget($packageName);
+            $event->set('fqcn', is_string($package) ? $package : null);
+
             $result = $manager->events()->fire($event);
             $package = $result->isEmpty() ? null : $result->top();
 

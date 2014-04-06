@@ -28,8 +28,8 @@ class OptionsProviderFeature implements Listener
 
         foreach ($manager->getPackages() as $packageName => $package) {
             if ($package instanceof OptionsProvider) {
-                if (isset($config[$packageName]['options'])) {
-                    $package->setOptions($config[$packageName]['options']);
+                if (isset($config[$packageName])) {
+                    $package->setOptions($config[$packageName]);
                 }
             }
         }

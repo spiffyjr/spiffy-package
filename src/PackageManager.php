@@ -5,7 +5,7 @@ namespace Spiffy\Package;
 use Spiffy\Event\EventsAwareTrait;
 use Spiffy\Event\Manager as EventManager;
 use Spiffy\Package\Feature;
-use Spiffy\Package\Listener;
+use Spiffy\Package\Listener\LoadModulesListener;
 
 class PackageManager implements Manager
 {
@@ -68,10 +68,11 @@ class PackageManager implements Manager
 
     /**
      * @param string $name
-     * @throws Exception\PackagesAlreadyLoadedException
+     * @param null|string $fqcn
      * @throws Exception\PackageExistsException
+     * @throws Exception\PackagesAlreadyLoadedException
      */
-    public function add($name)
+    public function add($name, $fqcn = null)
     {
         if ($this->loaded) {
             throw new Exception\PackagesAlreadyLoadedException();
@@ -81,7 +82,7 @@ class PackageManager implements Manager
             throw new Exception\PackageExistsException($name);
         }
 
-        $this->packages[$name] = null;
+        $this->packages[$name] = $fqcn;
     }
 
     /**
@@ -126,8 +127,7 @@ class PackageManager implements Manager
      */
     protected function initEvents(EventManager $events)
     {
-        $events->attach(new Listener\LoadModulesListener());
-        $events->attach(new Listener\ResolvePackageListener());
+        $events->attach(new LoadModulesListener());
         $events->attach(new Feature\OptionsProviderFeature());
     }
 }

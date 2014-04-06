@@ -23,17 +23,21 @@ class ResolvePackageListener implements Listener
      */
     public function onResolve(Event $e)
     {
-        $name = ucfirst(strtolower($e->getTarget()));
+        $name = $e->get('fqcn');
 
-        $name = preg_replace_callback('@_([a-z])@', function ($match) {
-            return ucfirst($match[1]);
-        }, $name);
+        if (empty($name)) {
+            $name = ucfirst(strtolower($e->getTarget()));
 
-        $name = preg_replace_callback('@\.([a-z])@', function ($match) {
-            return '\\' . ucfirst($match[1]);
-        }, $name);
+            $name = preg_replace_callback('@_([a-z])@', function ($match) {
+                return ucfirst($match[1]);
+            }, $name);
 
-        $name = $name . '\\Package';
+            $name = preg_replace_callback('@\.([a-z])@', function ($match) {
+                return '\\' . ucfirst($match[1]);
+            }, $name);
+
+            $name = $name . '\\Package';
+        }
 
         return class_exists($name) ? new $name() : null;
     }
