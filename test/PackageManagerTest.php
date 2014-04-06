@@ -70,7 +70,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetPackageThrowsExceptionIfPackagesNotLoaded()
     {
-        $pm = new PackageManager();
+        $pm = $this->pm;
         $pm->getPackage('spiffy.package.test_asset.application');
     }
 
