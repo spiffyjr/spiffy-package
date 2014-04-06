@@ -40,6 +40,19 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers ::add, ::load
+     */
+    public function testAddingPackageUsingFqcn()
+    {
+        $pm = $this->pm;
+        $pm->add('spiffy.package.test_asset.fqcn', 'Spiffy\\Package\\TestAsset\\FQCN\\Module');
+        $pm->load();
+
+        $package = $pm->getPackage('spiffy.package.test_asset.fqcn');
+        $this->assertInstanceOf('Spiffy\\Package\\TestAsset\\FQCN\\Module', $package);
+    }
+
+    /**
      * @covers ::getPackage, \Spiffy\Package\Exception\PackageDoesNotExistException::__construct
      * @expectedException \Spiffy\Package\Exception\PackageDoesNotExistException
      * @expectedExceptionMessage Package with name "foo" does not exist
