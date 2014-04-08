@@ -27,6 +27,16 @@ class PackageManager implements Manager
     protected $mergedConfig = [];
 
     /**
+     * @var string
+     */
+    protected $overridePattern;
+
+    /**
+     * @var integer
+     */
+    protected $overrideFlags = 0;
+
+    /**
      * @var \ArrayObject
      */
     protected $packages;
@@ -37,6 +47,38 @@ class PackageManager implements Manager
     public function __construct()
     {
         $this->packages = new \ArrayObject();
+    }
+
+    /**
+     * @param int $overrideFlags
+     */
+    public function setOverrideFlags($overrideFlags)
+    {
+        $this->overrideFlags = $overrideFlags;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOverrideFlags()
+    {
+        return $this->overrideFlags;
+    }
+
+    /**
+     * @param string $overridePattern
+     */
+    public function setOverridePattern($overridePattern)
+    {
+        $this->overridePattern = $overridePattern;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOverridePattern()
+    {
+        return $this->overridePattern;
     }
 
     /**
@@ -119,6 +161,11 @@ class PackageManager implements Manager
             if ($package instanceof Feature\ConfigProvider) {
                 $this->mergedConfig = array_replace_recursive($this->mergedConfig, $package->getConfig());
             }
+        }
+
+        $override = glob($this->overridePattern, $this->overrideFlags);
+        foreach ($override as $file) {
+            $this->mergedConfig = array_replace_recursive($this->mergedConfig, include $file);
         }
     }
 

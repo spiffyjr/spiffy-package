@@ -134,6 +134,50 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers ::setOverrideFlags, ::getOverrideFlags
+     */
+    public function testSetGetOverrideFlags()
+    {
+        $flags = GLOB_BRACE;
+
+        $pm = $this->pm;
+        $pm->setOverrideFlags($flags);
+
+        $this->assertSame($flags, $pm->getOverrideFlags());
+    }
+
+    /**
+     * @covers ::setOverridePattern, ::getOverridePattern
+     */
+    public function testSetGetOverridePattern()
+    {
+        $pattern = '*.php';
+
+        $pm = $this->pm;
+        $pm->setOverridePattern($pattern);
+        $this->assertSame($pattern, $pm->getOverridePattern());
+    }
+
+    /**
+     * @covers ::generateConfig
+     */
+    public function testOverrideConfig()
+    {
+        $expected = [
+            'foo' => 'bar',
+            'bar' => 'foo',
+            'baz' => 'booze',
+        ];
+
+        $pm = $this->pm;
+        $pm->setOverrideFlags(GLOB_BRACE);
+        $pm->setOverridePattern(__DIR__ . '/TestAsset/Application/config/{1,2}*.php');
+        $pm->load();
+
+        $this->assertSame($expected, $pm->getMergedConfig());
+    }
+
+    /**
      * @covers ::load
      */
     public function testLoadReturnsEarlyIfLoadedAlready()
