@@ -165,6 +165,9 @@ class PackageManager implements Manager
 
         $override = glob($this->overridePattern, $this->overrideFlags);
         foreach ($override as $file) {
+            if (empty($file) || !file_exists($file)) {
+                continue;
+            }
             $this->mergedConfig = array_replace_recursive($this->mergedConfig, include $file);
         }
     }
