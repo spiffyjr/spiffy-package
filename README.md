@@ -11,3 +11,16 @@ Spiffy\Package can be installed using composer which will setup any autoloading 
 `composer require spiffy/spiffy-package`
 
 Additionally, you can download or clone the repository and setup your own autoloading.
+
+## Naming
+
+Packages following the following internal naming schema when resolving.
+
+1) The package name is lower-cased.
+2) CamelCase is replaced with dash separation.
+3) Namespace backslashes are replaced with periods.
+
+e.g.,
+
+Spiffy\Mvc => spiffy.mvc
+Spiffy\AsseticPackage => spiffy.assetic-package

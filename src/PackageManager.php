@@ -5,6 +5,7 @@ namespace Spiffy\Package;
 use Spiffy\Event\EventsAwareTrait;
 use Spiffy\Event\Manager as EventManager;
 use Spiffy\Package\Feature;
+use Spiffy\Package\Feature\PathProvider;
 use Spiffy\Package\Listener\LoadModulesListener;
 
 class PackageManager implements Manager
@@ -20,6 +21,11 @@ class PackageManager implements Manager
      * @var bool
      */
     protected $loaded = false;
+
+    /**
+     * @var array
+     */
+    protected $pathCache = [];
 
     /**
      * @var array
@@ -110,6 +116,25 @@ class PackageManager implements Manager
 
     /**
      * @param string $name
+     * @return string
+     */
+    public function getPackagePath($name)
+    {
+        $package = $this->getPackage($name);
+
+        if ($package instanceof PathProvider) {
+            return $package->getPath();
+        }
+
+        if (!isset($this->pathCache[$name])) {
+            $refl = new \ReflectionClass($package);
+            $this->pathCache[$name] = realpath(dirname($refl->getFileName()) . '/..');
+        }
+        return $this->pathCache[$name];
+    }
+
+    /**
+     * @param string $name
      * @param null|string $fqcn
      * @throws Exception\PackageExistsException
      * @throws Exception\PackagesAlreadyLoadedException
@@ -159,17 +184,51 @@ class PackageManager implements Manager
     {
         foreach ($this->packages as $package) {
             if ($package instanceof Feature\ConfigProvider) {
-                $this->mergedConfig = array_replace_recursive($this->mergedConfig, $package->getConfig());
+                $this->mergedConfig = $this->merge($this->mergedConfig, $package->getConfig());
             }
         }
 
-        $override = glob($this->overridePattern, $this->overrideFlags);
+        $override = $this->getOverrideFiles();
         foreach ($override as $file) {
             if (empty($file) || !file_exists($file)) {
                 continue;
             }
-            $this->mergedConfig = array_replace_recursive($this->mergedConfig, include $file);
+            $this->mergedConfig = $this->merge($this->mergedConfig, include $file);
         }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getOverrideFiles()
+    {
+        return glob($this->overridePattern, $this->overrideFlags);
+    }
+
+    /**
+     * Taken from ZF2's ArrayUtils::merge() method.
+     *
+     * @param array $a
+     * @param array $b
+     * @return array
+     */
+    protected function merge(array $a, array $b)
+    {
+        foreach ($b as $key => $value) {
+            if (array_key_exists($key, $a)) {
+                if (is_int($key)) {
+                    $a[] = $value;
+                } elseif (is_array($value) && is_array($a[$key])) {
+                    $a[$key] = $this->merge($a[$key], $value);
+                } else {
+                    $a[$key] = $value;
+                }
+            } else {
+                $a[$key] = $value;
+            }
+        }
+
+        return $a;
     }
 
     /**

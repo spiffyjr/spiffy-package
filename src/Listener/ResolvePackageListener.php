@@ -28,7 +28,7 @@ class ResolvePackageListener implements Listener
         if (empty($name)) {
             $name = ucfirst(strtolower($e->getTarget()));
 
-            $name = preg_replace_callback('@_([a-z])@', function ($match) {
+            $name = preg_replace_callback('@-([a-z])@', function ($match) {
                 return ucfirst($match[1]);
             }, $name);
 

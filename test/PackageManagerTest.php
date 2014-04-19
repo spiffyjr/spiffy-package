@@ -2,6 +2,8 @@
 
 namespace Spiffy\Package;
 
+use Mockery as m;
+
 /**
  * @coversDefaultClass \Spiffy\Package\PackageManager
  */
@@ -19,6 +21,28 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $pm = new PackageManager();
         $this->assertInstanceOf('ArrayObject', $pm->getPackages());
+    }
+
+    /**
+     * @covers ::getPackagePath
+     */
+    public function testGetPackagePath()
+    {
+        $pm = $this->pm;
+        $pm->add('spiffy.package.test-asset.path');
+        $pm->load();
+
+        // Default path is up one dir from location
+        $this->assertSame(
+            realpath(__DIR__ . '/TestAsset'),
+            $pm->getPackagePath('spiffy.package.test-asset.application')
+        );
+
+        // Implemeting PathProvider
+        $this->assertSame(
+            realpath(__DIR__ . '/TestAsset/Path'),
+            $pm->getPackagePath('spiffy.package.test-asset.path')
+        );
     }
 
     /**
@@ -45,10 +69,10 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     public function testAddingPackageUsingFqcn()
     {
         $pm = $this->pm;
-        $pm->add('spiffy.package.test_asset.fqcn', 'Spiffy\\Package\\TestAsset\\FQCN\\Module');
+        $pm->add('spiffy.package.test-asset.fqcn', 'Spiffy\\Package\\TestAsset\\FQCN\\Module');
         $pm->load();
 
-        $package = $pm->getPackage('spiffy.package.test_asset.fqcn');
+        $package = $pm->getPackage('spiffy.package.test-asset.fqcn');
         $this->assertInstanceOf('Spiffy\\Package\\TestAsset\\FQCN\\Module', $package);
     }
 
@@ -71,7 +95,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     public function testGetPackageThrowsExceptionIfPackagesNotLoaded()
     {
         $pm = $this->pm;
-        $pm->getPackage('spiffy.package.test_asset.application');
+        $pm->getPackage('spiffy.package.test-asset.application');
     }
 
     /**
@@ -82,7 +106,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm = $this->pm;
         $pm->load();
 
-        $package = $pm->getPackage('spiffy.package.test_asset.application');
+        $package = $pm->getPackage('spiffy.package.test-asset.application');
         $this->assertInstanceOf('Spiffy\Package\TestAsset\Application\Package', $package);
     }
 
@@ -101,12 +125,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers ::add, \Spiffy\Package\Exception\PackageExistsException::__construct
      * @expectedException \Spiffy\Package\Exception\PackageExistsException
-     * @expectedExceptionMessage Package with name "spiffy.package.test_asset.application" already exists
+     * @expectedExceptionMessage Package with name "spiffy.package.test-asset.application" already exists
      */
     public function testAddThrowsExceptionWhenPackageExists()
     {
         $pm = $this->pm;
-        $pm->add('spiffy.package.test_asset.application');
+        $pm->add('spiffy.package.test-asset.application');
     }
 
     /**
@@ -159,7 +183,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::generateConfig
+     * @covers ::generateConfig, ::getOverrideFiles
      */
     public function testOverrideConfig()
     {
@@ -175,6 +199,23 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm->load();
 
         $this->assertSame($expected, $pm->getMergedConfig());
+    }
+
+    /**
+     * @covers ::generateConfig
+     */
+    public function testOverrideConfigSkipsEmptyOrMissingFiles()
+    {
+        $pm = m::mock('Spiffy\Package\PackageManager[getOverrideFiles]');
+        $pm->shouldAllowMockingProtectedMethods(true);
+        $pm
+            ->shouldReceive('getOverrideFiles')
+            ->once()
+            ->andReturn(['file' => '']);
+
+        $pm->load();
+
+        $this->assertSame([], $pm->getMergedConfig());
     }
 
     /**
@@ -194,10 +235,27 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($pm->load());
     }
 
+    /**
+     * @covers ::merge
+     */
+    public function testMerge()
+    {
+        $pm = $this->pm;
+        $a = ['one' => ['foo', 'bar'], 'two'];
+        $b = ['one' => ['baz' => 'booze'], 'three'];
+
+        $refl = new \ReflectionClass($pm);
+        $method = $refl->getMethod('merge');
+        $method->setAccessible(true);
+        $result = $method->invokeArgs($pm, [$a, $b]);
+
+        $this->assertSame(['one' => ['foo', 'bar', 'baz' => 'booze'], 'two', 'three'], $result);
+    }
+
     protected function setUp()
     {
         $pm = $this->pm = new PackageManager();
-        $pm->add('spiffy.package.test_asset.application');
-        $pm->add('spiffy.package.test_asset.override');
+        $pm->add('spiffy.package.test-asset.application');
+        $pm->add('spiffy.package.test-asset.override');
     }
 }

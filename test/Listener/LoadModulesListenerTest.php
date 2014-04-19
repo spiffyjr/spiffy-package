@@ -45,7 +45,7 @@ class LoadModulesListenerTest extends \PHPUnit_Framework_TestCase
     public function testOnLoad()
     {
         $manager = new PackageManager();
-        $manager->add('spiffy.package.test_asset.options');
+        $manager->add('spiffy.package.test-asset.options');
 
         $event = new Event(PackageManager::EVENT_LOAD, $manager);
 
@@ -55,7 +55,7 @@ class LoadModulesListenerTest extends \PHPUnit_Framework_TestCase
         $packages = $manager->getPackages();
         $this->assertInstanceOf(
             'Spiffy\Package\TestAsset\Options\Package',
-            $packages['spiffy.package.test_asset.options']
+            $packages['spiffy.package.test-asset.options']
         );
     }
 }

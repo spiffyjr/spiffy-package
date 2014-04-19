@@ -29,14 +29,14 @@ class OptionsProviderFeatureTest extends \PHPUnit_Framework_TestCase
     public function testOnLoadPostSetsOptions()
     {
         $manager = new PackageManager();
-        $manager->add('spiffy.package.test_asset.options');
+        $manager->add('spiffy.package.test-asset.options');
         $manager->load();
 
         $refl = new \ReflectionClass($manager);
         $config = $refl->getProperty('mergedConfig');
         $config->setAccessible(true);
         $config->setValue($manager, [
-            'spiffy.package.test_asset.options' => [
+            'spiffy.package.test-asset.options' => [
                 'foo' => 'bar'
             ]
         ]);
@@ -47,7 +47,7 @@ class OptionsProviderFeatureTest extends \PHPUnit_Framework_TestCase
         $feature->onLoadPost($event);
 
         /** @var \Spiffy\Package\TestAsset\Options\Package $package */
-        $package = $manager->getPackage('spiffy.package.test_asset.options');
+        $package = $manager->getPackage('spiffy.package.test-asset.options');
         $this->assertSame('bar', $package->getOption('foo'));
     }
 }
