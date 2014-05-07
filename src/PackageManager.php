@@ -12,10 +12,10 @@ class PackageManager implements Manager
 {
     use EventsAwareTrait;
 
-    const EVENT_LOAD = 'load';
-    const EVENT_LOAD_POST = 'load.post';
-    const EVENT_LOAD_PACKAGE = 'load.package';
-    const EVENT_RESOLVE = 'resolve';
+    const EVENT_LOAD = 'spiffy.package:load';
+    const EVENT_LOAD_POST = 'spiffy.package:load.post';
+    const EVENT_LOAD_PACKAGE = 'spiffy.package:load.package';
+    const EVENT_RESOLVE = 'spiffy.package:resolve';
 
     /**
      * @var bool
