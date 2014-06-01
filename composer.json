@@ -7,6 +7,7 @@
         }
     ],
     "description": "Spiffy\\Package is a light-weight, HHVM compatible, and dependency lite package manager.",
+    "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.4",
         "spiffy/spiffy-event": "dev-develop"
