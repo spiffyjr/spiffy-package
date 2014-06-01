@@ -1,22 +1,22 @@
 <?php
 
-namespace Spiffy\Package\Listener;
+namespace Spiffy\Package\Plugin;
 
 use Spiffy\Event\Event;
-use Spiffy\Event\Listener;
+use Spiffy\Event\Plugin;
 use Spiffy\Event\Manager;
 use Spiffy\Package\Exception;
 use Spiffy\Package\PackageManager;
 
-class LoadModulesListener implements Listener
+class LoadModulesPlugin implements Plugin
 {
     /**
      * {@inheritDoc}
      */
-    public function attach(Manager $events)
+    public function plug(Manager $events)
     {
         $events->on(PackageManager::EVENT_LOAD, [$this, 'onLoad'], 1000);
-        $events->attach(new ResolvePackageListener());
+        $events->plug(new ResolvePackagePlugin());
     }
 
     /**

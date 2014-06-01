@@ -2,20 +2,29 @@
 
 namespace Spiffy\Package;
 
+use Spiffy\Event\EventManager;
 use Spiffy\Event\EventsAwareTrait;
-use Spiffy\Event\Manager as EventManager;
-use Spiffy\Package\Feature;
-use Spiffy\Package\Feature\PathProvider;
-use Spiffy\Package\Listener\LoadModulesListener;
+use Spiffy\Package\Plugin;
 
-class PackageManager implements Manager
+final class PackageManager implements Manager
 {
     use EventsAwareTrait;
 
     const EVENT_LOAD = 'spiffy.package:load';
     const EVENT_LOAD_POST = 'spiffy.package:load.post';
     const EVENT_LOAD_PACKAGE = 'spiffy.package:load.package';
+    const EVENT_MERGE_CONFIG = 'spiffy.package:merge.config';
     const EVENT_RESOLVE = 'spiffy.package:resolve';
+
+    /**
+     * @var string
+     */
+    protected $overridePattern;
+
+    /**
+     * @var int
+     */
+    protected $overrideFlags;
 
     /**
      * @var bool
@@ -33,58 +42,19 @@ class PackageManager implements Manager
     protected $mergedConfig = [];
 
     /**
-     * @var string
-     */
-    protected $overridePattern;
-
-    /**
-     * @var integer
-     */
-    protected $overrideFlags = 0;
-
-    /**
      * @var \ArrayObject
      */
     protected $packages;
 
     /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->packages = new \ArrayObject();
-    }
-
-    /**
+     * @param string $overridePattern
      * @param int $overrideFlags
      */
-    public function setOverrideFlags($overrideFlags)
-    {
-        $this->overrideFlags = $overrideFlags;
-    }
-
-    /**
-     * @return int
-     */
-    public function getOverrideFlags()
-    {
-        return $this->overrideFlags;
-    }
-
-    /**
-     * @param string $overridePattern
-     */
-    public function setOverridePattern($overridePattern)
+    public function __construct($overridePattern = null, $overrideFlags = 0)
     {
         $this->overridePattern = $overridePattern;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOverridePattern()
-    {
-        return $this->overridePattern;
+        $this->overrideFlags = $overrideFlags;
+        $this->packages = new \ArrayObject();
     }
 
     /**
@@ -118,18 +88,20 @@ class PackageManager implements Manager
      * @param string $name
      * @return string
      */
-    public function getPackagePath($name)
+    public function getPath($name)
     {
+        if (isset($this->pathCache[$name])) {
+            return $this->pathCache[$name];
+        }
+
         $package = $this->getPackage($name);
-
-        if ($package instanceof PathProvider) {
-            return $package->getPath();
+        if ($package instanceof Feature\PathProvider) {
+            $this->pathCache[$name] = $package->getPath();
+        } else {
+            $refl = new \ReflectionObject($package);
+            $this->pathCache[$name] = realpath(dirname($refl->getFileName()));
         }
 
-        if (!isset($this->pathCache[$name])) {
-            $refl = new \ReflectionClass($package);
-            $this->pathCache[$name] = realpath(dirname($refl->getFileName()) . '/..');
-        }
         return $this->pathCache[$name];
     }
 
@@ -163,7 +135,11 @@ class PackageManager implements Manager
         }
 
         $this->events()->fire(static::EVENT_LOAD, $this);
-        $this->generateConfig();
+
+        foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
+            $this->mergedConfig = $this->merge($this->mergedConfig, $response);
+        }
+
         $this->events()->fire(static::EVENT_LOAD_POST, $this);
 
         $this->loaded = true;
@@ -178,41 +154,13 @@ class PackageManager implements Manager
     }
 
     /**
-     * @return void
-     */
-    protected function generateConfig()
-    {
-        foreach ($this->packages as $package) {
-            if ($package instanceof Feature\ConfigProvider) {
-                $this->mergedConfig = $this->merge($this->mergedConfig, $package->getConfig());
-            }
-        }
-
-        $override = $this->getOverrideFiles();
-        foreach ($override as $file) {
-            if (empty($file) || !file_exists($file)) {
-                continue;
-            }
-            $this->mergedConfig = $this->merge($this->mergedConfig, include $file);
-        }
-    }
-
-    /**
-     * @return array
-     */
-    protected function getOverrideFiles()
-    {
-        return glob($this->overridePattern, $this->overrideFlags);
-    }
-
-    /**
      * Taken from ZF2's ArrayUtils::merge() method.
      *
      * @param array $a
      * @param array $b
      * @return array
      */
-    protected function merge(array $a, array $b)
+    public function merge(array $a, array $b)
     {
         foreach ($b as $key => $value) {
             if (array_key_exists($key, $a)) {
@@ -234,9 +182,9 @@ class PackageManager implements Manager
     /**
      * {@inheritDoc}
      */
-    protected function initEvents(EventManager $events)
+    protected function attachDefaultPlugins(EventManager $events)
     {
-        $events->attach(new LoadModulesListener());
-        $events->attach(new Feature\OptionsProviderFeature());
+        $events->plug(new Plugin\ConfigMergePlugin($this->overridePattern, $this->overrideFlags));
+        $events->plug(new Plugin\LoadModulesPlugin());
     }
 }

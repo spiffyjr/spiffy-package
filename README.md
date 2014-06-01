@@ -22,5 +22,5 @@ Packages following the following internal naming schema when resolving.
 
 e.g.,
 
-Spiffy\Mvc => spiffy.mvc
+Spiffy\Mvc => mvc
 Spiffy\AsseticPackage => spiffy.assetic-package

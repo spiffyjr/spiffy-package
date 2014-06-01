@@ -1,24 +1,24 @@
 <?php
 
-namespace Spiffy\Package\Listener;
+namespace Spiffy\Package\Plugin;
 
 use Spiffy\Event\Event;
 use Spiffy\Event\EventManager;
 use Spiffy\Package\PackageManager;
 
 /**
- * @coversDefaultClass \Spiffy\Package\Listener\LoadModulesListener
+ * @coversDefaultClass \Spiffy\Package\Plugin\LoadModulesPlugin
  */
-class LoadModulesListenerTest extends \PHPUnit_Framework_TestCase
+class LoadModulesPluginTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @covers ::attach
+     * @covers ::plug
      */
-    public function testAttach()
+    public function testPlug()
     {
         $events = new EventManager();
-        $feature = new LoadModulesListener();
-        $feature->attach($events);
+        $p = new LoadModulesPlugin();
+        $p->plug($events);
 
         $this->assertCount(1, $events->getEvents(PackageManager::EVENT_LOAD));
     }
@@ -35,8 +35,8 @@ class LoadModulesListenerTest extends \PHPUnit_Framework_TestCase
 
         $event = new Event(PackageManager::EVENT_LOAD, $manager);
 
-        $feature = new LoadModulesListener();
-        $feature->onLoad($event);
+        $p = new LoadModulesPlugin();
+        $p->onLoad($event);
     }
 
     /**
@@ -45,17 +45,17 @@ class LoadModulesListenerTest extends \PHPUnit_Framework_TestCase
     public function testOnLoad()
     {
         $manager = new PackageManager();
-        $manager->add('spiffy.package.test-asset.options');
+        $manager->add('Spiffy\Package\TestAsset\Application');
 
         $event = new Event(PackageManager::EVENT_LOAD, $manager);
 
-        $feature = new LoadModulesListener();
-        $feature->onLoad($event);
+        $p = new LoadModulesPlugin();
+        $p->onLoad($event);
 
         $packages = $manager->getPackages();
         $this->assertInstanceOf(
-            'Spiffy\Package\TestAsset\Options\Package',
-            $packages['spiffy.package.test-asset.options']
+            'Spiffy\Package\TestAsset\Application\Package',
+            $packages['Spiffy\Package\TestAsset\Application']
         );
     }
 }
