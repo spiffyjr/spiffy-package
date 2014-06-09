@@ -99,7 +99,7 @@ final class PackageManager implements Manager
             $this->pathCache[$name] = $package->getPath();
         } else {
             $refl = new \ReflectionObject($package);
-            $this->pathCache[$name] = realpath(dirname($refl->getFileName()));
+            $this->pathCache[$name] = realpath(dirname($refl->getFileName()) . '/..');
         }
 
         return $this->pathCache[$name];
@@ -136,8 +136,19 @@ final class PackageManager implements Manager
 
         $this->events()->fire(static::EVENT_LOAD, $this);
 
-        foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
-            $this->mergedConfig = $this->merge($this->mergedConfig, $response);
+        if (file_exists('cache/package.config.php')) {
+            $this->mergedConfig = include 'cache/package.config.php';
+        } else {
+            foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
+                $this->mergedConfig = $this->merge($this->mergedConfig, $response);
+            }
+            /*file_put_contents(
+                'cache/package.config.php',
+                sprintf(
+                    '<?php return %s;',
+                    str_replace("\n", '', (var_export($this->mergedConfig, true)))
+                )
+            );*/
         }
 
         $this->events()->fire(static::EVENT_LOAD_POST, $this);

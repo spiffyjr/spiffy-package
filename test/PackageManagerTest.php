@@ -113,7 +113,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm->load();
 
         $package = $pm->getPackage('Spiffy\Package\TestAsset\Application');
-        $this->assertInstanceOf('Spiffy\Package\TestAsset\Application\Package', $package);
+        $this->assertInstanceOf('Spiffy\Package\TestAsset\EsoLfg\Package', $package);
     }
 
     /**
