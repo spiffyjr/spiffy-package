@@ -16,42 +16,29 @@ final class PackageManager implements Manager
     const EVENT_MERGE_CONFIG = 'spiffy.package:merge.config';
     const EVENT_RESOLVE = 'spiffy.package:resolve';
 
-    /**
-     * @var string
-     */
+    /** @var string|null */
+    private $cacheDir;
+    /** @var null|string */
     protected $overridePattern;
-
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $overrideFlags;
-
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $loaded = false;
-
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $pathCache = [];
-
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $mergedConfig = [];
-
-    /**
-     * @var \ArrayObject
-     */
+    /** @var \ArrayObject */
     protected $packages;
 
     /**
      * @param string $overridePattern
      * @param int $overrideFlags
+     * @param string|null $cacheDir
      */
-    public function __construct($overridePattern = null, $overrideFlags = 0)
+    public function __construct($overridePattern = null, $overrideFlags = 0, $cacheDir = null)
     {
+        $this->cacheDir = $cacheDir;
         $this->overridePattern = $overridePattern;
         $this->overrideFlags = $overrideFlags;
         $this->packages = new \ArrayObject();
@@ -135,20 +122,26 @@ final class PackageManager implements Manager
         }
 
         $this->events()->fire(static::EVENT_LOAD, $this);
-
-        if (file_exists('cache/package.config.php')) {
-            $this->mergedConfig = include 'cache/package.config.php';
+        
+        $cacheFile = $this->cacheDir ? $this->cacheDir . '/package.merged.config.php' : null;
+        
+                
+        if ($cacheFile && file_exists($cacheFile)) {
+            $this->mergedConfig = include $cacheFile;
         } else {
             foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
                 $this->mergedConfig = $this->merge($this->mergedConfig, $response);
             }
-            /*file_put_contents(
-                'cache/package.config.php',
-                sprintf(
-                    '<?php return %s;',
-                    str_replace("\n", '', (var_export($this->mergedConfig, true)))
-                )
-            );*/
+            
+            if (is_writeable(dirname($cacheFile))) {
+                file_put_contents(
+                    $cacheFile,
+                    sprintf(
+                        '<?php return %s;',
+                        var_export($this->mergedConfig, true)
+                    )
+                );
+            }
         }
 
         $this->events()->fire(static::EVENT_LOAD_POST, $this);

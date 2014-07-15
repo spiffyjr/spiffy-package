@@ -126,7 +126,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm = $this->pm;
         $pm->load();
         $pm->add('foo');
-    }
+   }
 
     /**
      * @covers ::add, \Spiffy\Package\Exception\PackageExistsException::__construct
@@ -137,6 +137,29 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     {
         $pm = $this->pm;
         $pm->add('Spiffy\Package\TestAsset\Application');
+    }
+
+    /**
+     * @covers ::load
+     */
+    public function testLoadCachedFile()
+    {
+        $tmp = sys_get_temp_dir();
+
+        $pm = new PackageManager(null, 0, $tmp);
+        $pm->load();
+
+        $file = sys_get_temp_dir() . '/package.merged.config.php';
+        $this->assertFileExists($file);
+
+        $result = include $file;
+
+        $this->assertSame($result, $pm->getMergedConfig());
+        
+        $pm = new PackageManager(null, 0, $tmp);
+        $pm->load();
+
+        $this->assertSame($result, $pm->getMergedConfig());
     }
 
     /**
@@ -202,5 +225,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm = $this->pm = new PackageManager();
         $pm->add('Spiffy\Package\TestAsset\Application');
         $pm->add('Spiffy\Package\TestAsset\Override');
+    }
+    
+    protected function tearDown()
+    {
+        if (file_exists(sys_get_temp_dir() . '/package.merged.config.php')) {
+            unlink(sys_get_temp_dir() . '/package.merged.config.php');
+        }
     }
 }
