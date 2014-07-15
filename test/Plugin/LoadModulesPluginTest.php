@@ -54,7 +54,7 @@ class LoadModulesPluginTest extends \PHPUnit_Framework_TestCase
 
         $packages = $manager->getPackages();
         $this->assertInstanceOf(
-            'Spiffy\Package\TestAsset\EsoLfg\Package',
+            'Spiffy\Package\TestAsset\Application\Package',
             $packages['Spiffy\Package\TestAsset\Application']
         );
     }

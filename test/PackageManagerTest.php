@@ -34,7 +34,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         // Default path is up one dir from location
         $this->assertSame(
-            realpath(__DIR__ . '/TestAsset/Application'),
+            realpath(__DIR__ . '/TestAsset'),
             $pm->getPath('Spiffy\Package\TestAsset\Application')
         );
 
@@ -113,7 +113,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         $pm->load();
 
         $package = $pm->getPackage('Spiffy\Package\TestAsset\Application');
-        $this->assertInstanceOf('Spiffy\Package\TestAsset\EsoLfg\Package', $package);
+        $this->assertInstanceOf('Spiffy\Package\TestAsset\Application\Package', $package);
     }
 
     /**
