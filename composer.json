@@ -10,7 +10,7 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.4",
-        "spiffy/spiffy-event": "dev-develop"
+        "spiffy/spiffy-event": "~1.0.1"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
