@@ -122,17 +122,17 @@ final class PackageManager implements Manager
         }
 
         $this->events()->fire(static::EVENT_LOAD, $this);
-        
+
         $cacheFile = $this->cacheDir ? $this->cacheDir . '/package.merged.config.php' : null;
-        
-                
+
+
         if ($cacheFile && file_exists($cacheFile)) {
             $this->mergedConfig = include $cacheFile;
         } else {
             foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
                 $this->mergedConfig = $this->merge($this->mergedConfig, $response);
             }
-            
+
             if (is_writeable(dirname($cacheFile))) {
                 file_put_contents(
                     $cacheFile,

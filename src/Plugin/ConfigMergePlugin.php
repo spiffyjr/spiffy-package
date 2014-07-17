@@ -5,7 +5,6 @@ namespace Spiffy\Package\Plugin;
 use Spiffy\Event\Event;
 use Spiffy\Event\Plugin;
 use Spiffy\Event\Manager;
-use Spiffy\Package\Exception;
 use Spiffy\Package\Feature\ConfigProvider;
 use Spiffy\Package\PackageManager;
 
