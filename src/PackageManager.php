@@ -10,6 +10,8 @@ final class PackageManager implements Manager
 {
     use EventsAwareTrait;
 
+    const CACHE_FILE_NAME = 'package.merged.config.php';
+    
     const EVENT_LOAD = 'spiffy.package:load';
     const EVENT_LOAD_POST = 'spiffy.package:load.post';
     const EVENT_LOAD_PACKAGE = 'spiffy.package:load.package';
@@ -122,30 +124,22 @@ final class PackageManager implements Manager
         }
 
         $this->events()->fire(static::EVENT_LOAD, $this);
-
-        $cacheFile = $this->cacheDir ? $this->cacheDir . '/package.merged.config.php' : null;
-
-
+        $cacheFile = $this->getCacheFile();
+        
         if ($cacheFile && file_exists($cacheFile)) {
             $this->mergedConfig = include $cacheFile;
         } else {
             foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
+                if (empty($response)) {
+                    continue;
+                }
+                
                 $this->mergedConfig = $this->merge($this->mergedConfig, $response);
             }
-
-            if (is_writeable(dirname($cacheFile))) {
-                file_put_contents(
-                    $cacheFile,
-                    sprintf(
-                        '<?php return %s;',
-                        var_export($this->mergedConfig, true)
-                    )
-                );
-            }
+            $this->writeCache();
         }
 
         $this->events()->fire(static::EVENT_LOAD_POST, $this);
-
         $this->loaded = true;
     }
 
@@ -158,7 +152,7 @@ final class PackageManager implements Manager
     }
 
     /**
-     * Taken from ZF2's ArrayUtils::merge() method.
+     * Borrowed from ZF2's ArrayUtils::merge() method.
      *
      * @param array $a
      * @param array $b
@@ -181,6 +175,35 @@ final class PackageManager implements Manager
         }
 
         return $a;
+    }
+
+    /**
+     * Writes config to filesystem.
+     */
+    public function writeCache()
+    {
+        $cacheFile = $this->getCacheFile();
+        if (!$cacheFile) {
+            return;
+        }
+        
+        if (is_writeable(dirname($cacheFile))) {
+            file_put_contents(
+                $cacheFile,
+                sprintf(
+                    '<?php return %s;',
+                    var_export($this->mergedConfig, true)
+                )
+            );
+        }
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCacheFile()
+    {
+        return $this->cacheDir ? $this->cacheDir . '/' . self::CACHE_FILE_NAME : null;
     }
 
     /**

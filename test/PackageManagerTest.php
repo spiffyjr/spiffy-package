@@ -70,7 +70,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::add, ::load
+     * @covers ::add
+     * @covers ::load
      */
     public function testAddingPackageUsingFqcn()
     {
@@ -83,7 +84,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::getPackage, \Spiffy\Package\Exception\PackageDoesNotExistException::__construct
+     * @covers ::getPackage
+     * @covers \Spiffy\Package\Exception\PackageDoesNotExistException::__construct
      * @expectedException \Spiffy\Package\Exception\PackageDoesNotExistException
      * @expectedExceptionMessage Package with name "foo" does not exist
      */
@@ -94,7 +96,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::getPackage, \Spiffy\Package\Exception\PackagesNotLoadedException::__construct
+     * @covers ::getPackage
+     * @covers \Spiffy\Package\Exception\PackagesNotLoadedException::__construct
      * @expectedException \Spiffy\Package\Exception\PackagesNotLoadedException
      * @expectedExceptionMessage Packages have not been loaded
      */
@@ -117,7 +120,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::add, \Spiffy\Package\Exception\PackagesAlreadyLoadedException::__construct
+     * @covers ::add
+     * @covers \Spiffy\Package\Exception\PackagesAlreadyLoadedException::__construct
      * @expectedException \Spiffy\Package\Exception\PackagesAlreadyLoadedException
      * @expectedExceptionMessage Packages can not be added after loading is complete
      */
@@ -129,7 +133,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
    }
 
     /**
-     * @covers ::add, \Spiffy\Package\Exception\PackageExistsException::__construct
+     * @covers ::add
+     * @covers \Spiffy\Package\Exception\PackageExistsException::__construct
      * @expectedException \Spiffy\Package\Exception\PackageExistsException
      * @expectedExceptionMessage Package with name "Spiffy\Package\TestAsset\Application" already exists
      */
@@ -141,9 +146,16 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers ::load
+     * @covers ::writeCache
+     * @covers ::getCacheFile
      */
     public function testLoadCachedFile()
     {
+        $pm = new PackageManager();
+        $pm->load();
+        
+        $this->assertFileNotExists(sys_get_temp_dir() . '/package.merged.config.php');
+        
         $tmp = sys_get_temp_dir();
 
         $pm = new PackageManager(null, 0, $tmp);
@@ -163,7 +175,8 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::load, ::generateConfig
+     * @covers ::load
+     * @covers ::getMergedConfig
      */
     public function testLoadFiresEventsAndGeneratesConfig()
     {
@@ -209,15 +222,15 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
     public function testMerge()
     {
         $pm = $this->pm;
-        $a = ['one' => ['foo', 'bar'], 'two'];
-        $b = ['one' => ['baz' => 'booze'], 'three'];
+        $a = ['one' => ['foo', 'bar'], 'stringkey' => 'string', 'two'];
+        $b = ['one' => ['baz' => 'booze'], 'stringkey' => 'override', 'three'];
 
         $refl = new \ReflectionClass($pm);
         $method = $refl->getMethod('merge');
         $method->setAccessible(true);
         $result = $method->invokeArgs($pm, [$a, $b]);
 
-        $this->assertSame(['one' => ['foo', 'bar', 'baz' => 'booze'], 'two', 'three'], $result);
+        $this->assertSame(['one' => ['foo', 'bar', 'baz' => 'booze'], 'stringkey' => 'override', 'two', 'three'], $result);
     }
 
     protected function setUp()
