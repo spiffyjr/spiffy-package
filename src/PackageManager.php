@@ -2,21 +2,15 @@
 
 namespace Spiffy\Package;
 
-use Spiffy\Event\EventManager;
-use Spiffy\Event\EventsAwareTrait;
+use Hookline\HooksAware;
+use Hookline\HooksAwareTrait;
 use Spiffy\Package\Plugin;
 
-final class PackageManager implements Manager
+final class PackageManager implements HooksAware, Manager
 {
-    use EventsAwareTrait;
+    use HooksAwareTrait;
 
     const CACHE_FILE_NAME = 'package.merged.config.php';
-    
-    const EVENT_LOAD = 'spiffy.package:load';
-    const EVENT_LOAD_POST = 'spiffy.package:load.post';
-    const EVENT_LOAD_PACKAGE = 'spiffy.package:load.package';
-    const EVENT_MERGE_CONFIG = 'spiffy.package:merge.config';
-    const EVENT_RESOLVE = 'spiffy.package:resolve';
 
     /** @var string|null */
     private $cacheDir;
@@ -123,23 +117,23 @@ final class PackageManager implements Manager
             return;
         }
 
-        $this->events()->fire(static::EVENT_LOAD, $this);
+        $this->hooks()->run('onLoad', $this);
         $cacheFile = $this->getCacheFile();
         
         if ($cacheFile && file_exists($cacheFile)) {
             $this->mergedConfig = include $cacheFile;
         } else {
-            foreach ($this->events()->fire(static::EVENT_MERGE_CONFIG, $this) as $response) {
-                if (empty($response)) {
+            foreach ($this->hooks()->run('onMerge', $this) as $config) {
+                if (empty($config)) {
                     continue;
                 }
                 
-                $this->mergedConfig = $this->merge($this->mergedConfig, $response);
+                $this->mergedConfig = $this->merge($this->mergedConfig, $config);
             }
             $this->writeCache();
         }
 
-        $this->events()->fire(static::EVENT_LOAD_POST, $this);
+        $this->hooks()->run('afterLoad', $this, $this->mergedConfig);
         $this->loaded = true;
     }
 

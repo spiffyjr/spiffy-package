@@ -4,5 +4,4 @@ namespace Spiffy\Package;
 
 interface Manager
 {
-
 }

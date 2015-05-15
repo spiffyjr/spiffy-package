@@ -3,6 +3,7 @@
 namespace Spiffy\Package;
 
 use Mockery as m;
+use Spiffy\Package\TestAsset\TestHook;
 
 /**
  * @coversDefaultClass \Spiffy\Package\PackageManager
@@ -180,23 +181,18 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadFiresEventsAndGeneratesConfig()
     {
-        $load = false;
-        $loadPost = false;
         $pm = $this->pm;
 
         $this->assertSame([], $pm->getMergedConfig());
 
-        $pm->events()->on(PackageManager::EVENT_LOAD, function() use (&$load) {
-            $load = true;
-        });
-        $pm->events()->on(PackageManager::EVENT_LOAD_POST, function() use (&$loadPost) {
-            $loadPost = true;
-        });
+        $hook = new TestHook();
+
+        $pm->hooks()->add($hook);
         $pm->load();
 
-        $this->assertTrue($load);
-        $this->assertTrue($loadPost);
-        $this->assertEquals(['foo' => 'foobar', 'bar' => 'foo', 'baz' => 'baz'], $pm->getMergedConfig());
+        $this->assertTrue($hook->onLoad);
+        $this->assertSame($pm->getMergedConfig(), $hook->mergedConfig);
+        $this->assertEquals(['foo' => 'bar'], $pm->getMergedConfig());
     }
 
     /**
