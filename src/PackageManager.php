@@ -4,7 +4,6 @@ namespace Spiffy\Package;
 
 use Hookline\HooksAware;
 use Hookline\HooksAwareTrait;
-use Spiffy\Package\Plugin;
 
 final class PackageManager implements HooksAware, Manager
 {
@@ -198,14 +197,5 @@ final class PackageManager implements HooksAware, Manager
     public function getCacheFile()
     {
         return $this->cacheDir ? $this->cacheDir . '/' . self::CACHE_FILE_NAME : null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function attachDefaultPlugins(EventManager $events)
-    {
-        $events->plug(new Plugin\ConfigMergePlugin($this->overridePattern, $this->overrideFlags));
-        $events->plug(new Plugin\LoadModulesPlugin());
     }
 }
