@@ -2,7 +2,7 @@
 
 namespace Spiffy\Package\Feature;
 
-interface ConfigProvider
+interface ConfigProviderInterface
 {
     /**
      * @return array

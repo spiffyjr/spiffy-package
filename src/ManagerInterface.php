@@ -2,6 +2,6 @@
 
 namespace Spiffy\Package;
 
-interface Manager
+interface ManagerInterface
 {
 }

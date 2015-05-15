@@ -2,9 +2,9 @@
 
 namespace Spiffy\Package\TestAsset\Override;
 
-use Spiffy\Package\Feature\ConfigProvider;
+use Spiffy\Package\Feature\ConfigProviderInterface;
 
-class Package implements ConfigProvider
+class Package implements ConfigProviderInterface
 {
     /**
      * {@inheritDoc}

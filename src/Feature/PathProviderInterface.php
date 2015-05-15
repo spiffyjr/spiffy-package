@@ -2,7 +2,7 @@
 
 namespace Spiffy\Package\Feature;
 
-interface PathProvider
+interface PathProviderInterface
 {
     /**
      * @return string

@@ -2,21 +2,26 @@
 
 namespace Spiffy\Package;
 
-use Hookline\HooksAware;
+use Hookline\Exception\InvalidHookException;
+use Hookline\HookInterface;
+use Hookline\HooksAwareInterface;
 use Hookline\HooksAwareTrait;
 
-final class PackageManager implements HooksAware, Manager
+final class PackageManager implements HooksAwareInterface, ManagerInterface
 {
     use HooksAwareTrait;
 
     const CACHE_FILE_NAME = 'package.merged.config.php';
 
-    /** @var string|null */
-    private $cacheDir;
-    /** @var null|string */
-    protected $overridePattern;
-    /** @var int */
-    protected $overrideFlags;
+    /** @var array */
+    private $config = [];
+    /** @var array */
+    private $configDefaults = [
+        'cache_dir' => null,
+        'override_pattern' => null,
+        'override_flags' => 0,
+    ];
+
     /** @var bool */
     protected $loaded = false;
     /** @var array */
@@ -27,16 +32,14 @@ final class PackageManager implements HooksAware, Manager
     protected $packages;
 
     /**
-     * @param string $overridePattern
-     * @param int $overrideFlags
-     * @param string|null $cacheDir
+     * @param array $config
      */
-    public function __construct($overridePattern = null, $overrideFlags = 0, $cacheDir = null)
+    public function __construct(array $config = [])
     {
-        $this->cacheDir = $cacheDir;
-        $this->overridePattern = $overridePattern;
-        $this->overrideFlags = $overrideFlags;
         $this->packages = new \ArrayObject();
+
+        $this->setConfigDefaults($config);
+        $this->installDefaultHooks();
     }
 
     /**
@@ -77,7 +80,7 @@ final class PackageManager implements HooksAware, Manager
         }
 
         $package = $this->getPackage($name);
-        if ($package instanceof Feature\PathProvider) {
+        if ($package instanceof Feature\PathProviderInterface) {
             $this->pathCache[$name] = $package->getPath();
         } else {
             $refl = new \ReflectionObject($package);
@@ -196,6 +199,33 @@ final class PackageManager implements HooksAware, Manager
      */
     public function getCacheFile()
     {
-        return $this->cacheDir ? $this->cacheDir . '/' . self::CACHE_FILE_NAME : null;
+        return $this->config['cache_dir'] ? $this->config['cache_dir'] . '/' . self::CACHE_FILE_NAME : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    private function setConfigDefaults(array $config)
+    {
+        $this->config = array_merge($this->configDefaults, $config);
+
+        if (!isset($this->config['hooks'])) {
+            $this->config['hooks'] = [new DefaultPackageHook()];
+        }
+    }
+
+    private function installDefaultHooks()
+    {
+        foreach ($this->config['hooks'] as $hook) {
+            if (!$hook instanceof HookInterface) {
+                throw new InvalidHookException();
+            }
+            $this->hooks()->add($hook);
+        }
     }
 }

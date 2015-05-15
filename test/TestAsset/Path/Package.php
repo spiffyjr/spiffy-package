@@ -2,10 +2,9 @@
 
 namespace Spiffy\Package\TestAsset\Path;
 
-use Spiffy\Package\Feature\OptionsProviderTrait;
-use Spiffy\Package\Feature\PathProvider;
+use Spiffy\Package\Feature\PathProviderInterface;
 
-class Package implements PathProvider
+class Package implements PathProviderInterface
 {
     /**
      * @return string

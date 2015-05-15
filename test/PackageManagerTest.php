@@ -159,7 +159,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
         
         $tmp = sys_get_temp_dir();
 
-        $pm = new PackageManager(null, 0, $tmp);
+        $pm = new PackageManager(['cache_dir' => $tmp]);
         $pm->load();
 
         $file = sys_get_temp_dir() . '/package.merged.config.php';
@@ -169,7 +169,7 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($result, $pm->getMergedConfig());
         
-        $pm = new PackageManager(null, 0, $tmp);
+        $pm = new PackageManager(['cache_dir' => $tmp]);
         $pm->load();
 
         $this->assertSame($result, $pm->getMergedConfig());

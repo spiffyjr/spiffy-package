@@ -1,10 +1,10 @@
 <?php
 namespace Spiffy\Package\TestAsset;
 
-use Spiffy\Package\PackageHook;
+use Spiffy\Package\PackageHookInterface;
 use Spiffy\Package\PackageManager;
 
-class TestHook implements PackageHook
+class TestHook implements PackageHookInterface
 {
     public $onLoad = false;
     public $mergedConfig = [];

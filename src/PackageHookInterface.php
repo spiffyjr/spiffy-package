@@ -1,9 +1,9 @@
 <?php
 namespace Spiffy\Package;
 
-use Hookline\Hook;
+use Hookline\HookInterface;
 
-interface PackageHook extends Hook
+interface PackageHookInterface extends HookInterface
 {
     /**
      * @param PackageManager $packageManager
