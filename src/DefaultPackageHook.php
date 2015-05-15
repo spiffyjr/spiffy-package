@@ -12,9 +12,16 @@ class DefaultPackageHook implements PackageHookInterface
     {
         $packages = $packageManager->getPackages();
         foreach ($packages as $name => $package) {
-            if (empty($package)) {
-                $packageName = $name . '\\Package';
-                $package = class_exists($packageName) ? new $packageName() : null;
+            $fcqn = null;
+
+            if (is_string($package)) {
+                $fcqn = $package;
+            } else if (empty($package)) {
+                $fcqn = $name . '\\Package';
+            }
+
+            if (null !== $fcqn) {
+                $package = class_exists($fcqn) ? new $fcqn() : null;
             }
 
             if (null === $package) {

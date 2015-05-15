@@ -181,13 +181,12 @@ class PackageManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadFiresEventsAndGeneratesConfig()
     {
-        $pm = $this->pm;
+        $pm = new PackageManager();
+        $hook = new TestHook();
+        $pm->hooks()->add($hook);
 
         $this->assertSame([], $pm->getMergedConfig());
 
-        $hook = new TestHook();
-
-        $pm->hooks()->add($hook);
         $pm->load();
 
         $this->assertTrue($hook->onLoad);
